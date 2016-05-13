@@ -180,7 +180,7 @@ void XMLStream::stream_open() {
 		if (from_domain.block()) {
 			throw Metre::host_unknown("Requesting domain is blocked");
 		}
-		if (from_domain.forward() != domain.forward()) {
+		if ((domain.transport_type() != COMP) && (from_domain.forward() == domain.forward())) {
 			throw Metre::host_unknown("Will not forward between those domains");
 		}
 		if (from_domain.transport_type() == COMP) {
@@ -223,6 +223,12 @@ void XMLStream::stream_open() {
 			m_session->send(doc);
 		}
 	} else if (m_dir == OUTBOUND) {
+		if (m_type == S2S) {
+			auto id_att = stream->first_attribute("id");
+			if (id_att) {
+				m_stream_id = id_att->value();
+			}
+		}
 		return;
 		auto so = m_stream.first_node();
 		auto dbatt = so->first_attribute("xmlns:db");
